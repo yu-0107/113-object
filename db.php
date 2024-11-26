@@ -11,10 +11,27 @@ class DB{
     }
     /**
      * 撈出全部資料
-     * 
+     * 1.整理資料表
+     * 2.有條件
+     * 3.其他SQL功能
      */
-    function all(){
-        return $this->q("SELECT * FROM $this->table");
+    function all(...$arg){
+        $sql="SELECT * FROM $this->table ";
+        if(!empty($arg[0])){
+            if(is_array($arg[0])){
+
+                $where=$this->a2s($arg[0]);
+                $sql=$sql . " WHERE ". join(" && ",$where);
+            }else{
+                // $sal=$sql.$arg[0];
+                $sql .= $arg[0];
+            }
+        }
+        if(!empty($arg[1])){
+            $sql=$sql . $arg[1];
+        }
+
+        return $this->fetchAll($sql);
     }
     /**
      * 把陣列轉成條件字串陣列
@@ -51,9 +68,7 @@ function dd($array){
 $DEPT=new DB('dept');
 
 // $dept=$DEPT->q("SELECT * FROM dept");
-$dept=$DEPT->all();
+$dept=$DEPT->all(" order by `id` DESC");
 
 dd($dept);
 
-
-?>
