@@ -33,25 +33,38 @@ class DB{
 
         return $this->fetchAll($sql);
     }
+
+    function find($id){
+        $sql="SELECT * FROM $this->table ";
+
+        if(is_array($id)){
+            $where=$this->a2s($id);
+            $sql=$sql . " WHERE ". join(" && ",$where);
+        }else{
+            $sql .= " WHERE `id`='$id' ";
+        }
+        return $this->fetchOne($sql);
+    }
+    
     /**
      * 把陣列轉成條件字串陣列
      */
     function a2s($array){
         $tmp=[];
         foreach($array as $key => $value){
-            $tmp="`$key`='$value'";
+            $tmp[]="`$key`='$value'";
         }
         return $tmp;
     }
 
     function fetchOne($sql){
         //echo $sql
-        return $this->pdo->query($sql)->fetch();
+        return $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
     }
 
     function fetchAll($sql){
         //echo $sql
-        return $this->pdo->query($sql)->fetchAll();
+        return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
@@ -68,7 +81,7 @@ function dd($array){
 $DEPT=new DB('dept');
 
 // $dept=$DEPT->q("SELECT * FROM dept");
-$dept=$DEPT->all(" order by `id` DESC");
+$dept=$DEPT->find(['code'=>'404']);
 
 dd($dept);
 
