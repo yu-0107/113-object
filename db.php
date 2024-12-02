@@ -10,6 +10,8 @@ class DB{
         $this->pdo=new PDO($this->dsn,'root','');
     }
 
+
+
     /**
      * 撈出全部資料
      * 1. 整張資料表
@@ -65,7 +67,7 @@ class DB{
             $sql="INSERT INTO $this->table (`".join("`,`",$cols)."`) VALUES('".join("','",$array)."')";
         }
         
-        echo $sql;
+        //echo $sql;
         return $this->pdo->exec($sql);
     }
     
@@ -95,17 +97,53 @@ class DB{
         return $tmp;
     }
 
+    function max($col,$where=[]){
+        return $this->math('max',$col,$where);
+    }
+    function sum($col,$where=[]){
+        return $this->math('sum',$col,$where);
+    }
+    function min($col,$where=[]){
+        return $this->math('min',$col,$where);
+    }
+    function avg($col,$where=[]){
+        return $this->avg('avg',$col,$where);
+    }
+    function count($where=[]){
+        return $this->math('count','*',$where);
+    }
 
-    function fetchOne($sql){
+    /**
+     * 取得單筆資料
+     */
+    protected function fetchOne($sql){
         //echo $sql;
         return $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
     }
     
-    function fetchAll($sql){
+    /**
+     * 取得多筆資料
+     */
+    protected function fetchAll($sql){
         //echo $sql;
         return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
     
+    /**
+     * 方便使用各個聚合函式
+     */
+    
+     protected function math($math,$col='id',$where=[]){
+        $sql="SELECT $math($col) FROM $this->table";
+
+        if(!empty($where)){
+            $tmp=$this->a2s($where);
+            $sql=$sql . " WHERE " . join(" && ", $tmp);
+        }
+
+        return $this->pdo->query($sql)->fetchColumn();
+    }
+
 }
 
 /* function q($sql){
@@ -126,7 +164,15 @@ $DEPT=new DB('dept');
 // $dept=$DEPT->find(2);
 $dept=$DEPT->find(['code'=>'404']);
 // $DEPT->save(['code'=>'504']);
-$DEPT->save(['code'=>'504','id'=>'7','name'=>'資訊發展部']);
+// $DEPT->save(['code'=>'504','id'=>'7','name'=>'資訊發展部']);
 // $DEPT->del(2);
 // $DEPT->del(['code'=>'404']);
-dd($dept);
+// dd($dept);
+
+// echo $DEPT->math('max','id',['code'=>'504']);
+echo "<br>";
+echo $DEPT->max('id',['code'=>'503']);
+echo "<br>";
+echo $DEPT->count(['code'=>'503']);
+echo "<br>";
+echo $DEPT->count();
